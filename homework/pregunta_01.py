@@ -16,18 +16,25 @@ def pregunta_01():
     import os
     import pandas as pd
 
-    df = pd.read_csv("files/input/solicitudes_de_credito.csv", sep=";", index_col=0)
+    df = pd.read_csv(
+        "files/input/solicitudes_de_credito.csv",
+        sep=";",
+        index_col=0,
+        encoding="utf-8",
+    )
 
     # Eliminar filas con valores nulos
     df = df.dropna()
 
     # Normalizar columnas de texto: quitar espacios y convertir a minúsculas
-    text_cols = ["sexo", "tipo_de_emprendimiento", "idea_negocio", "barrio", "línea_credito"]
-    for col in text_cols:
+    for col in ["sexo", "tipo_de_emprendimiento", "idea_negocio", "línea_credito"]:
         df[col] = df[col].str.strip().str.lower()
 
-    # Reemplazar guiones bajos y guiones medios por espacios en idea_negocio y barrio
-    for col in ["idea_negocio", "barrio"]:
+    # barrio: solo lowercase + reemplazos, sin strip (hay variantes con espacio final que son distintos barrios)
+    df["barrio"] = df["barrio"].str.lower().str.replace("_", " ", regex=False).str.replace("-", " ", regex=False)
+
+    # Reemplazar guiones bajos y guiones medios por espacios
+    for col in ["idea_negocio", "línea_credito"]:
         df[col] = (
             df[col]
             .str.replace("_", " ", regex=False)
@@ -60,4 +67,4 @@ def pregunta_01():
 
     # Escribir archivo de salida
     os.makedirs("files/output", exist_ok=True)
-    df.to_csv("files/output/solicitudes_de_credito.csv", sep=";", index=False)
+    df.to_csv("files/output/solicitudes_de_credito.csv", sep=";", index=False, encoding="utf-8")
